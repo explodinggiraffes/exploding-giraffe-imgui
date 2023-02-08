@@ -1,26 +1,44 @@
 #include "glsl_vf_program.h"
 
 #include <fstream>
-//#include <iostream> // TODO: Remove this if this class doesn't write to std::cerr
+#include <iostream>
 #include <sstream>
 
 namespace shader {
 
 GlslVFProgram::GlslVFProgram() noexcept { }
 
-// TODO: If Init(...) will return error codes, we probably want to use an enum instead of ints.
-int GlslVFProgram::Init(const std::string& vertex_shader_path, const std::string& fragment_shader_path) {
+GlslVFProgram::~GlslVFProgram() {
+  DeleteProgram();
+}
+
+bool GlslVFProgram::Init(const std::string& vertex_shader_path, const std::string& fragment_shader_path) {
   bool success = false;
   std::string source;
 
-  success = GetShaderSourceFromFilesystem("", source);
+  success = GetShaderSourceFromFilesystem(vertex_shader_path, source);
   if (!success) {
-    return 1;
+    return false;
+  }
+  success = CompileShader(GL_VERTEX_SHADER, source.c_str(), vertex_shader_id_);
+  if (!success) {
+    return false;
   }
 
-  success = CompileShader();
+  success = GetShaderSourceFromFilesystem(fragment_shader_path, source);
+  if (!success) {
+    return false;
+  }
+  success = CompileShader(GL_FRAGMENT_SHADER, source.c_str(), fragment_shader_id_);
+  if (!success) {
+    return false;
+  }
 
-  return 0;
+  LinkProgram();
+
+  source.clear();
+
+  return true;
 }
 
 // TODO: Implement
@@ -28,12 +46,16 @@ void GlslVFProgram::UseProgram() {
   //
 }
 
-// TODO: Do we want to use out_source to return an error message, too?
-bool GlslVFProgram::GetShaderSourceFromFilesystem(std::string_view path, std::string& out_source) {
-  std::ifstream input_stream;
-  input_stream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+void GlslVFProgram::DeleteProgram() {
+  if (!did_delete_program_) {
+    glDeleteProgram(program_id_);
+    did_delete_program_ = true;
+  }
+}
 
-  try {
+bool GlslVFProgram::GetShaderSourceFromFilesystem(std::string_view path, std::string& out_source) {
+  std::ifstream input_stream(path.data());
+  if (input_stream.is_open()) {
     input_stream.open(path.data(), std::ios_base::in);
 
     std::stringstream source_stream;
@@ -42,20 +64,74 @@ bool GlslVFProgram::GetShaderSourceFromFilesystem(std::string_view path, std::st
     out_source = source_stream.str();
 
     return true;
-  } catch (std::ios_base::failure& e) {
-    //std::cerr << "Unable to load shader: " << path << " " << e.what() << " error code: " << e.code() << "\n";
+  } else {
+    std::cerr << "Unable to load shader: " << path << "\n";
     return false;
   }
 }
 
-// TODO: Implement
-bool GlslVFProgram::CompileShader() {
-  return false;
+bool GlslVFProgram::CompileShader(GLenum shader_type, const char* source, GLuint& out_shader_id) {
+  bool success = false;
+
+  out_shader_id = glCreateShader(shader_type);
+
+  glShaderSource(
+    out_shader_id,  // ID of the shader to compile
+    1,              // number of lines of shader code
+    &source,        // reference to source code
+    nullptr         // source code is null terminated
+  );
+
+  glCompileShader(out_shader_id);
+
+  GLint did_compile = 0;
+  glGetShaderiv(out_shader_id, GL_COMPILE_STATUS, &did_compile);
+  if (did_compile == GL_TRUE) {
+    success = true;
+  } else {
+    GLint log_length = 0;
+    glGetShaderiv(out_shader_id, GL_INFO_LOG_LENGTH, &log_length);
+
+    GLchar* log = new GLchar[log_length];
+    glGetShaderInfoLog(out_shader_id, log_length, nullptr, log);
+
+    std::cerr << "Unable to compile shader: " << log << "\n";
+
+    delete[] log;
+    glDeleteShader(out_shader_id);
+  }
+
+  return success;
 }
 
-// TODO: Implement
-bool GlslVFProgram::LinkShader() {
-  return false;
+bool GlslVFProgram::LinkProgram() {
+  bool success = false;
+
+  program_id_ = glCreateProgram();
+  glAttachShader(program_id_, vertex_shader_id_);
+  glAttachShader(program_id_, fragment_shader_id_);
+  glLinkProgram(program_id_);
+
+  GLint did_link = 0;
+  glGetProgramiv(program_id_, GL_LINK_STATUS, &did_link);
+  if (did_link == GL_TRUE) {
+    success = true;
+  } else {
+    GLint log_length = 0;
+    glGetProgramiv(program_id_, GL_INFO_LOG_LENGTH, &log_length);
+
+    GLchar* log = new GLchar[log_length];
+    glGetProgramInfoLog(program_id_, log_length, nullptr, log);
+
+    std::cerr << "Unable to link shader: " << log << "\n";
+
+    delete[] log;
+  }
+
+  glDeleteShader(vertex_shader_id_);
+  glDeleteShader(fragment_shader_id_);
+
+  return success;
 }
 
 }

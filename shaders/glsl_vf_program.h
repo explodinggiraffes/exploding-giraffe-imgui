@@ -22,19 +22,25 @@ public:
   GlslVFProgram(GlslVFProgram&&) = delete;
   GlslVFProgram& operator=(GlslVFProgram&&) = delete;
 
-  int Init(const std::string& vertex_shader_path, const std::string& fragment_shader_path);
+  ~GlslVFProgram();
+
+  bool Init(const std::string& vertex_shader_path, const std::string& fragment_shader_path);
 
   void UseProgram();
+
+  void DeleteProgram();
 
 private:
   bool GetShaderSourceFromFilesystem(std::string_view path, std::string& out_source);
 
-  bool CompileShader();
-  bool LinkShader();
+  bool CompileShader(GLenum shader_type, const char* source, GLuint& out_shader_id);
+  bool LinkProgram();
 
   GLuint vertex_shader_id_ = 0;
-  GLuint fragment_shader_id = 0;
-  GLuint program_id = 0;
+  GLuint fragment_shader_id_ = 0;
+  GLuint program_id_ = 0;
+
+  bool did_delete_program_ = false;
 };
 
 }
