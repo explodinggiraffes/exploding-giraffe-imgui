@@ -1,5 +1,6 @@
 #include "application.h"
 
+#include <cstdlib>
 #include <iostream>
 
 #include <glad/glad.h>
@@ -74,37 +75,34 @@ namespace giraffe {
 
 Application::Application() noexcept { }
 
+Application::~Application() {
+  if (!did_shutdown_) {
+    Shutdown();
+  }
+}
+
 bool Application::Init(const InitialState& initial_state) {
   if (!InitGlfw()) {
-    std::cerr << "Unable to intialize GLFW" << std::endl;
+    std::cerr << "Unable to intialize GLFW\n";
     return false;
   }
 
   if (!InitGlfwWindow(initial_state)) {
-    std::cerr << "Unable to create the GLFW window" << std::endl;
+    std::cerr << "Unable to create the GLFW window\n";
     return false;
   }
 
   if (!InitGlad()) {
-    std::cerr << "Unable to initialize GLAD" << std::endl;
+    std::cerr << "Unable to initialize GLAD\n";
     return false;
   }
 
   if (!InitImGui()) {
-    std::cerr << "Unable to initialize ImGui" << std::endl;
+    std::cerr << "Unable to initialize ImGui\n";
     return false;
   }
 
   return true;
-}
-
-void Application::Shutdown() {
-  ImGui_ImplOpenGL3_Shutdown();
-  ImGui_ImplGlfw_Shutdown();
-  ImGui::DestroyContext();
-
-  glfwDestroyWindow(glfw_window_);
-  glfwTerminate();
 }
 
 void Application::Run() {
@@ -112,8 +110,12 @@ void Application::Run() {
   GLuint vao = 0;
   GLuint vbo = 0;
   GLuint ebo = 0;
-  // CreateTriangle(vao, vbo, ebo)
-  // glsl_triangle_program.Init("vertex_shader_path", "fragment_shader_path")
+  CreateTriangle(vao, vbo, ebo);
+  bool success = glsl_triangle_program.Init("resources/shaders/triangle_shader.vs", "resources/shaders/triangle_shader.fs");
+  if (!success) {
+    std::cerr << "Unable to create the triangle shader\n";
+    exit(EXIT_FAILURE);
+  }
 
   while (!glfwWindowShouldClose(glfw_window_)) {
     glfwPollEvents();
@@ -124,7 +126,6 @@ void Application::Run() {
 
     // TODO: Use shader program here.
 
-    // Create ExplodingGiraffe's ImGui-based UI.
     BuildUi();
 
     ImGui::Render();
@@ -148,6 +149,19 @@ void Application::Run() {
     }
 
     glfwSwapBuffers(glfw_window_);
+  }
+}
+
+void Application::Shutdown() {
+  if (!did_shutdown_) {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+    glfwDestroyWindow(glfw_window_);
+    glfwTerminate();
+
+    did_shutdown_ = true;
   }
 }
 
