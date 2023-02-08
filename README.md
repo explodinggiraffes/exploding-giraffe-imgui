@@ -5,7 +5,7 @@ Demonstrates using OpenGL, GLFW, and ImGui together to build an application.
 
 You can use `README - ExplodingGiraffe project properties.txt` for ideas on how you might want to structure your own project using these libraries and VS build events.
 
-Note: Exploding Giraffes has its VS solution and project files in different directories for flexibility (e.g., we want the solution to encompass different projects that all rely upon the libraries in `extern`.) There is nothing specific to GLFW, ImGuim, etc. dictating this structure.
+Note: Exploding Giraffes has its VS solution and project files in different directories for flexibility (e.g., we want the solution to encompass different projects that all rely upon the libraries in `extern`.) There is nothing specific to GLFW, ImGui, etc. dictating this structure.
 
 ### Motivation
 
