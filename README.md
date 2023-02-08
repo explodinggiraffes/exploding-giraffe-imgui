@@ -1,7 +1,7 @@
 Exploding Giraffes
 =====
 
-Demonstrates OpenGL, GLFW, and ImGui used to build an application.
+Demonstrates using OpenGL, GLFW, and ImGui together to build an application.
 
 You can use `README - ExplodingGiraffe project properties.txt` for ideas on how you might want to structure your own project using these libraries and VS build events.
 

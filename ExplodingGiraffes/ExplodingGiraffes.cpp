@@ -4,7 +4,7 @@
 #include "application.h"
 
 /* ------------------------------------------------------------------------------------------------------------------
- * Dear ImGui demo.
+ * Demonstrates using OpenGL, GLFW, and ImGui together to build an application.
  *-----------------------------------------------------------------------------------------------------------------*/
 int main(int argc, char* argv[]) {
   giraffe::Application application;
