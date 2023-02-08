@@ -29,10 +29,13 @@ public:
   Application(Application&&) = delete;
   Application& operator=(Application&&) = delete;
 
+  ~Application();
+
   bool Init(const InitialState& initial_state = InitialState());
-  void Shutdown();
 
   void Run();
+
+  void Shutdown();
 
   void SetWindowPosition(int x, int y);
 
@@ -50,6 +53,8 @@ private:
   shader::GlslVFProgram glsl_triangle_program;
 
   GLFWwindow* glfw_window_ = nullptr;
+
+  bool did_shutdown_ = false;
 };
 
 }
