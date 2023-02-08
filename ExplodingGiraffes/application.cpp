@@ -188,8 +188,8 @@ bool Application::InitGlfwWindow(const InitialState& initial_state) {
     initial_state.window_width,
     initial_state.window_height,
     initial_state.window_title.c_str(),
-    NULL,
-    NULL
+    nullptr,
+    nullptr
   );
   if (glfw_window_ == nullptr) {
     return false;
