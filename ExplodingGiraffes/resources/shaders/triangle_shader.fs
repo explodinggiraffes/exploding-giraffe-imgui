@@ -7,6 +7,6 @@ in vec3 vertex_color;
 
 uniform vec3 color;
 
-void main() {		
-	FragColor = vec4(color * vertex_color, 1.0);
+void main() {
+    FragColor = vec4(color * vertex_color, 1.0);
 }
