@@ -50,7 +50,7 @@ private:
   static void HandleGlfwError(int error, const char* description);
   static void HandleGlfwWindowResize(GLFWwindow* window, int width, int height);
 
-  shader::GlslVFProgram glsl_triangle_program;
+  shader::GlslVFProgram glsl_triangle_program_;
 
   GLFWwindow* glfw_window_ = nullptr;
 
