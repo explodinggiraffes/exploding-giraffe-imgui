@@ -43,7 +43,7 @@ bool GlslVFProgram::Init(const std::string& vertex_shader_path, const std::strin
 
 // TODO: Implement
 void GlslVFProgram::UseProgram() {
-  //
+  glUseProgram(program_id_);
 }
 
 void GlslVFProgram::DeleteProgram() {
