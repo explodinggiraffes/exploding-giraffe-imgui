@@ -64,7 +64,6 @@ void CreateTriangle(GLuint& out_vao, GLuint& out_vbo, GLuint& out_ebo) {
   glEnableVertexAttribArray(1);
 
   // Unbind our OpenGL objects.
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindVertexArray(0);
 }
@@ -111,7 +110,8 @@ void Application::Run() {
   GLuint vbo = 0;
   GLuint ebo = 0;
   CreateTriangle(vao, vbo, ebo);
-  bool success = glsl_triangle_program.Init("resources/shaders/triangle_shader.vs", "resources/shaders/triangle_shader.fs");
+
+  bool success = glsl_triangle_program_.Init("resources/shaders/triangle_shader.vs", "resources/shaders/triangle_shader.fs");
   if (!success) {
     std::cerr << "Unable to create the triangle shader\n";
     exit(EXIT_FAILURE);
@@ -124,7 +124,9 @@ void Application::Run() {
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
-    // TODO: Use shader program here.
+    glsl_triangle_program_.UseProgram();
+    glBindVertexArray(vao);
+    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
 
     BuildUi();
 
